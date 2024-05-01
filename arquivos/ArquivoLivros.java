@@ -7,7 +7,11 @@ import aeds3.ParIntInt;
 import aeds3.ListaInvertida;
 import entidades.Livro;
 import java.text.Normalizer;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class ArquivoLivros extends Arquivo<Livro> {
 
@@ -87,11 +91,15 @@ public class ArquivoLivros extends Arquivo<Livro> {
 
   // Funcao de tratamento para os titulos
 
-  public String[] processaStrings(String chave) {
+  public static String[] processaStrings(String chave) throws IOException {
     String[] chaves = chave.split(" ");
     for (int i = 0; i < chaves.length; i++) {
-      chaves[i] = chaves[i].toLowerCase();
-      chaves[i] = removerAcentos(chaves[i]);
+      chaves[i] = chaves[i].toLowerCase(); // Coloca em letras minusculas
+      if (!isStopWord(chaves[i])) { // Checa se é uma stopword
+        chaves[i] = removerAcentos(chaves[i]); // Se não for, termina de tratar tirando os acentos
+      } else {
+        chaves[i] = null; // Se for stopword, é retirada do array
+      }
     }
     for (int i = 0; i < chaves.length; i++) {
       System.out.println(chaves[i]);
@@ -101,16 +109,41 @@ public class ArquivoLivros extends Arquivo<Livro> {
 
   // Funcao que remove acento de palavras
   public static String removerAcentos(String texto) {
-    String textoNormalizado = Normalizer.normalize(texto, Normalizer.Form.NFD);
-    // Regex que substitui letras específicas acentuadas por suas versões não
-    // acentuadas
-    Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-    return pattern.matcher(textoNormalizado).replaceAll("");
+    String textoSemAcento = Normalizer.normalize(texto, Normalizer.Form.NFD);
+    return textoSemAcento.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+  }
+
+  // Função itera por arquivo contendo todas as stopwords e checa se a palavra em
+  // análise é ou não uma stopword
+  public static boolean isStopWord(String s) throws IOException {
+    boolean resp = false;
+    BufferedReader br = new BufferedReader(new FileReader("dados/stopwords.txt"));
+    String line;
+    while ((line = br.readLine()) != null) {
+      if (s.compareTo(line.trim()) == 0) { // .trim() usado pois arquivo possui espaço em branco extra ao final de cada linha
+        resp = true;
+        break;
+      }
+    }
+    br.close();
+    return resp;
   }
 
 
-  public static boolean isStopWord(String s) {
-      
-  } 
+  public void buscar(String pesquisa) throws Exception {
+    //Tratamento da String pesquisada
+    ArrayList<String> chaves = new ArrayList<>(Arrays.asList(processaStrings(pesquisa)));
+    ArrayList<int[]> ids = new ArrayList<>();
+
+    //Array list contendo todos os conjuntos referentes a cada palavra da busca
+    for(String c : chaves) {
+      ids.add(lista.read(c));
+    }
+
+    //Interseção entre os conjuntos 
+
+    
+
+  }
 
 }
