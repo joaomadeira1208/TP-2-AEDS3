@@ -120,7 +120,7 @@ public class MenuLivros {
           incluirLivro();
           break;
         case 2:
-          buscarLivro();
+          buscarLivroChave();
           break;
         case 3:
           alterarLivro();
@@ -212,6 +212,31 @@ public class MenuLivros {
         return;
       }
       mostraLivro(l);
+    } catch (Exception e) {
+      System.out.println("Erro no acesso ao arquivo");
+      e.printStackTrace();
+    }
+  }
+
+  public void buscarLivroChave() {
+    String chave;
+    System.out.println("\n\n\nBOOKAEDS 1.0");
+    System.out.println("------------");
+    System.out.println("\n> Início > Livros > Busca");
+    System.out.print("\nNome do livro: ");
+    chave = console.nextLine();
+    if (chave.length() == 0)
+      return;
+
+    try {
+      Livro [] livros = arqLivros.buscar(chave);
+       if (livros[0].getID() == -1) {
+         System.out.println("Livro não encontrado.");
+         return;
+       }
+      for (Livro l : livros) {
+        mostraLivro(l);
+      }
     } catch (Exception e) {
       System.out.println("Erro no acesso ao arquivo");
       e.printStackTrace();

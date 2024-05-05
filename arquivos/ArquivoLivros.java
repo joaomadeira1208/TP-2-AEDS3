@@ -130,20 +130,53 @@ public class ArquivoLivros extends Arquivo<Livro> {
   }
 
 
-  public void buscar(String pesquisa) throws Exception {
-    //Tratamento da String pesquisada
-    ArrayList<String> chaves = new ArrayList<>(Arrays.asList(processaStrings(pesquisa)));
-    ArrayList<int[]> ids = new ArrayList<>();
-
-    //Array list contendo todos os conjuntos referentes a cada palavra da busca
-    for(String c : chaves) {
-      ids.add(lista.read(c));
+  public Livro[] buscar(String pesquisa) throws Exception {
+    String [] chaves = processaStrings(pesquisa);
+    int tam = chaves.length;
+    int[] ids = lista.read(chaves[0]);
+    int[] intersecao = new int[ids.length];
+    
+    if(ids.length == 0) {
+      intersecao = new int[1];
+      intersecao[0] = -1;
+    }
+    else {
+      System.out.println("TESTE");
+      for(int i = 1; i < tam; i++) {
+        int[] ids_2 = lista.read(chaves[i]);
+        intersecao = intersecao(ids, ids_2);
+      }
     }
 
-    //Interseção entre os conjuntos 
+    Livro[] resultados = new Livro[intersecao.length];
+    Livro controle = new Livro();
+    resultados[0] = controle;
 
-    
+    if(intersecao[0] == -1) {
+      return resultados;
+    }
 
+    for(int i = 0; i < intersecao.length; i++) {
+      resultados[i] = super.read(intersecao[i]);
+    }
+
+    return resultados;
+  }
+
+  
+  public int[] intersecao(int[] a, int[] b) {
+    int[] intersecao = new int[a.length];
+    intersecao[0] = -1;
+    int k = 0;
+    for(int i = 0; i < a.length; i++) {
+      for(int j = 0; j < b.length; j++) {
+        if(a[i] == b[j]) {
+          intersecao[k] = a[i];
+          k++;
+        }
+      }
+    }
+    return intersecao;
   }
 
 }
