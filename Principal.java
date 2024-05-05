@@ -1,13 +1,12 @@
 
-import java.io.File;
-import java.util.Scanner;
-
 import arquivos.ArquivoAutores;
 import arquivos.ArquivoCategorias;
 import arquivos.ArquivoLivros;
 import entidades.Autor;
 import entidades.Categoria;
 import entidades.Livro;
+import java.io.File;
+import java.util.Scanner;
 
 public class Principal {
 
@@ -74,6 +73,8 @@ public class Principal {
       new File("dados/livros_isbn.hash_d.db").delete();
       new File("dados/livros_isbn.hash_c.db").delete();
       new File("dados/livros_categorias.btree.db").delete();
+      new File("dados/dicionario.listainv.db").delete();
+      new File("dados/blocos.listainv.db").delete();
 
       ArquivoLivros arqLivros = new ArquivoLivros();
       ArquivoCategorias arqCategorias = new ArquivoCategorias();

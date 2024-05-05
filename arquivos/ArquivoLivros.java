@@ -3,15 +3,14 @@ package arquivos;
 import aeds3.Arquivo;
 import aeds3.ArvoreBMais;
 import aeds3.HashExtensivel;
-import aeds3.ParIntInt;
 import aeds3.ListaInvertida;
+import aeds3.ParIntInt;
 import entidades.Livro;
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ArquivoLivros extends Arquivo<Livro> {
 
@@ -35,8 +34,10 @@ public class ArquivoLivros extends Arquivo<Livro> {
   public int create(Livro obj) throws Exception {
     int id = super.create(obj);
     obj.setID(id);
+    //TRATAMENTO DE CHAVE
     String chave = obj.getTitulo();
     String[] chaves = processaStrings(chave);
+    //CRIAÇÃO CHAVES NA LISTA INVERTIDA
     for (int i = 0; i < chaves.length; i++) {
       if (chaves[i] != null)
         lista.create(chaves[i], id);
@@ -58,11 +59,20 @@ public class ArquivoLivros extends Arquivo<Livro> {
   @Override
   public boolean delete(int id) throws Exception {
     Livro obj = super.read(id);
-    if (obj != null)
+    String chave = obj.getTitulo();
+    if (obj != null) {
+      //REMOVE ID DAS CHAVES NA LISTA INVERTIDA
+      String[] chaves = processaStrings(chave);
+      for(int i = 0; i < chaves.length; i++) {
+        if (chaves[i] != null)
+          lista.delete(chaves[i], id);
+      }
+
       if (indiceIndiretoISBN.delete(ParIsbnId.hashIsbn(obj.getIsbn()))
           &&
           relLivrosDaCategoria.delete(new ParIntInt(obj.getIdCategoria(), obj.getID())))
         return super.delete(id);
+    }
     return false;
   }
 
@@ -83,6 +93,23 @@ public class ArquivoLivros extends Arquivo<Livro> {
         relLivrosDaCategoria.create(new ParIntInt(novoLivro.getIdCategoria(), novoLivro.getID()));
       }
 
+
+      //REMOVE LIVRO ANTIGO LISTA INVERTIDA
+      String chave = livroAntigo.getTitulo();
+      String[] chaves = processaStrings(chave);
+      for(int i = 0; i < chaves.length; i++) {
+        if (chaves[i] != null)
+          lista.delete(chaves[i], livroAntigo.getID());
+      }
+
+      //ADICIONA LIVRO ATUALIZADO LISTA INVERTIDA
+      chave = novoLivro.getTitulo();
+      String[] novasChaves = processaStrings(chave);
+      for(int i = 0; i < novasChaves.length; i++) {
+        if (chaves[i] != null)
+          lista.create(novasChaves[i], novoLivro.getID());
+      }
+      
       // Atualiza o livro
       return super.update(novoLivro);
     }
@@ -101,16 +128,38 @@ public class ArquivoLivros extends Arquivo<Livro> {
         chaves[i] = null; // Se for stopword, é retirada do array
       }
     }
-    for (int i = 0; i < chaves.length; i++) {
-      System.out.println(chaves[i]);
-    }
     return chaves;
   }
 
-  // Funcao que remove acento de palavras
+  // Hash table contendo os caracteres acentuados e suas versões sem acento
+  private static final Map<Character, Character> MAPA_ACENTOS = new HashMap<>();
+
+  static {
+      MAPA_ACENTOS.put('á', 'a');
+      MAPA_ACENTOS.put('é', 'e');
+      MAPA_ACENTOS.put('í', 'i');
+      MAPA_ACENTOS.put('ó', 'o');
+      MAPA_ACENTOS.put('ú', 'u');
+      MAPA_ACENTOS.put('â', 'a');
+      MAPA_ACENTOS.put('ê', 'e');
+      MAPA_ACENTOS.put('î', 'i');
+      MAPA_ACENTOS.put('ô', 'o');
+      MAPA_ACENTOS.put('û', 'u');
+      MAPA_ACENTOS.put('ç', 'c');
+      MAPA_ACENTOS.put('ã', 'a'); 
+  }
+
+  // Analise cada caracter da String texto e gera uma nova string substituindo os caracteres das hash por sua versão sem acento 
   public static String removerAcentos(String texto) {
-    String textoSemAcento = Normalizer.normalize(texto, Normalizer.Form.NFD);
-    return textoSemAcento.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+      StringBuilder textoSemAcento = new StringBuilder();
+      for (char c : texto.toCharArray()) {
+          if (MAPA_ACENTOS.containsKey(c)) {
+              textoSemAcento.append(MAPA_ACENTOS.get(c));
+          } else {
+              textoSemAcento.append(c);
+          }
+      }
+      return textoSemAcento.toString();
   }
 
   // Função itera por arquivo contendo todas as stopwords e checa se a palavra em
@@ -130,6 +179,8 @@ public class ArquivoLivros extends Arquivo<Livro> {
   }
 
 
+
+  // MÉTODO BUSCAR PELO TÍTULO
   public Livro[] buscar(String pesquisa) throws Exception {
     String [] chaves = processaStrings(pesquisa);
     int tam = chaves.length;
@@ -141,7 +192,6 @@ public class ArquivoLivros extends Arquivo<Livro> {
       intersecao[0] = -1;
     }
     else {
-      System.out.println("TESTE");
       for(int i = 1; i < tam; i++) {
         int[] ids_2 = lista.read(chaves[i]);
         intersecao = intersecao(ids, ids_2);
