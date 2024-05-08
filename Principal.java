@@ -8,12 +8,14 @@ import entidades.Livro;
 import java.io.File;
 import java.util.Scanner;
 
+import aeds3.ListaInvertida;
+
 public class Principal {
 
   private static Scanner console = new Scanner(System.in);
 
   public static void main(String[] args) {
-
+    ListaInvertida lista;
     try {
 
       int opcao;
@@ -24,6 +26,7 @@ public class Principal {
         System.out.println("\n1) Categorias");
         System.out.println("2) Autores");
         System.out.println("3) Livros");
+        System.out.println("4) Lista Invertida (chaves)");
         System.out.println("\n9) Reiniciar BD");
         System.out.println("\n0) Sair");
 
@@ -43,6 +46,19 @@ public class Principal {
             break;
           case 3:
             (new MenuLivros()).menu();
+            break;
+          case 4:
+            try {
+            File d = new File("dados");
+            if (!d.exists())
+              d.mkdir();
+            lista = new ListaInvertida(4, "dados/dicionario.listainv.db", "dados/blocos.listainv.db");
+      
+            lista.print();
+      
+          } catch (Exception e) {
+            e.printStackTrace();
+            }
             break;
           case 9:
             preencherDados();
@@ -86,7 +102,7 @@ public class Principal {
       arqCategorias.create(new Categoria("Policial"));
       arqCategorias.create(new Categoria("Aventura"));
       arqCategorias.create(new Categoria("Suspense"));
-
+      
       arqAutores.create(new Autor("Homero"));
       arqAutores.create(new Autor("Lilian Bacich"));
       arqAutores.create(new Autor("Adolfo Tanzi Neto"));
@@ -94,7 +110,7 @@ public class Principal {
       arqAutores.create(new Autor("Plínio Dentzien"));
       arqAutores.create(new Autor("Ivan Izquierdo"));
       arqAutores.create(new Autor("Mariana Zapata"));
-
+      
       arqLivros.create(new Livro("9788563560278", "Odisseia", 15.99F, 1));
       arqLivros.create(new Livro("9788584290483", "Ensino Híbrido", 39.90F, 2));
       arqLivros.create(new Livro("9786559790005", "Modernidade Líquida", 48.1F, 3));
