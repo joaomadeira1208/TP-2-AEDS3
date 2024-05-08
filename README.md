@@ -19,21 +19,31 @@ CheckList:
 
 1 - A inclusão de um livro acrescenta os termos do seu título à lista invertida?
   - Sim
+    
 2 - A alteração de um livro modifica a lista invertida removendo ou acrescentando termos do título?
   - Sim
+
 3 - A remoção de um livro gera a remoção dos termos do seu título na lista invertida? 
   - Sim
+
 4 - Há uma busca por palavras que retorna os livros que possuam essas palavras?
   - Sim
+
 5 - Essa busca pode ser feita com mais de uma palavra?
   - Sim
+    
 6 - As stop words foram removidas de todo o processo?
   - Sim
+    
 7 - Que modificação, se alguma, você fez para além dos requisitos mínimos desta tarefa?
   - Nenhuma
+    
 8 - O trabalho está funcionando corretamente?
   - Sim
+    
 9 - O trabalho está completo?
   - Sim
+    
 10 - O trabalho é original e não a cópia de um trabalho de um colega?
   - Sim
+    
